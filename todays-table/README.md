@@ -26,11 +26,8 @@ No API keys, tokens, passwords, or private spreadsheet/deployment IDs are commit
 
 ### Android App
 
-1. Copy `.env.example` or set `GEMINI_API_KEY` in `gradle.properties` / environment variables if you want a default fallback Gemini image-generation key compiled into `BuildConfig.GEMINI_API_KEY`.
-2. In the app's **Backend Settings** sheet (gear icon), configure:
-   - **Apps Script Web App URL** (`https://script.google.com/macros/s/<DEPLOYMENT_ID>/exec`)
-   - **Google Sheet URL** (`https://docs.google.com/spreadsheets/d/<SPREADSHEET_ID>/edit`)
-   - **Gemini API Key** (optional, used only as a fallback when a YellowPicnic meal has no product image URL)
+1. Copy `local.properties.example` to `local.properties` (gitignored) and set `sdk.dir`, `GEMINI_API_KEY`, `DEFAULT_WEB_APP_URL`, and `DEFAULT_GOOGLE_SHEET_URL`. Gradle injects these into `BuildConfig` at build time without committing them.
+2. You can also override any of these at runtime in the app's **Backend Settings** sheet (gear icon).
 3. Build and install:
    ```bash
    ./gradlew :app:assembleDebug

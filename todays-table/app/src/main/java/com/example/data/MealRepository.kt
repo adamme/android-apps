@@ -32,11 +32,12 @@ private const val TAG = "MealRepository"
 class MealRepository(private val context: Context) {
 
     companion object {
-        const val DEFAULT_WEB_APP_URL =
-            "https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec"
-        const val DEFAULT_GOOGLE_SHEET_URL =
-            "https://docs.google.com/spreadsheets/d/YOUR_SPREADSHEET_ID/edit?gid=0#gid=0"
-        const val DEFAULT_GEMINI_API_KEY = ""
+        val DEFAULT_WEB_APP_URL: String
+            get() = BuildConfig.DEFAULT_WEB_APP_URL
+        val DEFAULT_GOOGLE_SHEET_URL: String
+            get() = BuildConfig.DEFAULT_GOOGLE_SHEET_URL
+        val DEFAULT_GEMINI_API_KEY: String
+            get() = BuildConfig.GEMINI_API_KEY
 
         private const val PREFS_NAME = "meal_rater_prefs"
         private const val KEY_WEB_APP_URL = "web_app_url"

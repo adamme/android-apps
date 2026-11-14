@@ -1,8 +1,25 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
+}
+
+val localProps = Properties().apply {
+    val propsFile = rootProject.file("local.properties")
+    if (propsFile.exists()) {
+        propsFile.inputStream().use { load(it) }
+    }
+}
+
+fun resolveLocalConfig(key: String, defaultValue: String = ""): String {
+    val raw = localProps.getProperty(key)
+        ?: providers.gradleProperty(key).orNull
+        ?: System.getenv(key)
+        ?: defaultValue
+    return raw.replace("\\", "\\\\").replace("\"", "\\\"")
 }
 
 android {
@@ -15,10 +32,17 @@ android {
         targetSdk = 35
         versionCode = 2
         versionName = "1.1"
-        val geminiApiKey = providers.gradleProperty("GEMINI_API_KEY").orNull
-            ?: System.getenv("GEMINI_API_KEY")
-            ?: ""
-        buildConfigField("String", "GEMINI_API_KEY", "\"$geminiApiKey\"")
+        buildConfigField("String", "GEMINI_API_KEY", "\"${resolveLocalConfig("GEMINI_API_KEY")}\"")
+        buildConfigField(
+            "String",
+            "DEFAULT_WEB_APP_URL",
+            "\"${resolveLocalConfig("DEFAULT_WEB_APP_URL", "https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec")}\""
+        )
+        buildConfigField(
+            "String",
+            "DEFAULT_GOOGLE_SHEET_URL",
+            "\"${resolveLocalConfig("DEFAULT_GOOGLE_SHEET_URL", "https://docs.google.com/spreadsheets/d/YOUR_SPREADSHEET_ID/edit?gid=0#gid=0")}\""
+        )
 
         vectorDrawables {
             useSupportLibrary = true
