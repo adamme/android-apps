@@ -1,0 +1,31 @@
+<resources>
+    <string name="app_name">Today\u2019s Table</string>
+    <string name="header_subtitle">Unrated Kitchen Queue</string>
+    <string name="header_title">Today\u2019s Table</string>
+    <string name="filter_all">All</string>
+    <string name="filter_hellofresh">HelloFresh</string>
+    <string name="filter_yellowpicnic">YellowPicnic</string>
+    <string name="badge_hellofresh">HelloFresh</string>
+    <string name="badge_yellowpicnic">YellowPicnic</string>
+    <string name="action_refresh">Refresh Google Sheet</string>
+    <string name="action_settings">Backend Settings</string>
+    <string name="action_rate_meal">Rate Meal</string>
+    <string name="action_open_recipe">View Recipe</string>
+    <string name="label_date_eaten">Date Eaten</string>
+    <string name="chip_today">Today</string>
+    <string name="chip_pick_date">Calendar</string>
+    <string name="label_anissa_score">Anissa\u2019s Rating</string>
+    <string name="label_adamme_score">Adamme\u2019s Rating</string>
+    <string name="action_submit_rating">Save Rating to Sheet</string>
+    <string name="action_submitting_rating">Saving to Google Sheet…</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="empty_queue_title">All Caught Up!</string>
+    <string name="empty_queue_subtitle">Every meal in your HelloFresh and YellowPicnic tabs has been rated and sorted.</string>
+    <string name="error_loading_title">Couldn\u2019t Reach Google Sheet</string>
+    <string name="action_retry">Try Again</string>
+    <string name="settings_sheet_title">Google Sheet &amp; Web App</string>
+    <string name="settings_google_sheet_url_label">Google Sheet URL (for Column E Average filter)</string>
+    <string name="settings_url_label">Apps Script Web App URL</string>
+    <string name="settings_save">Save &amp; Sync</string>
+    <string name="settings_reset">Reset to Default</string>
+</resources>

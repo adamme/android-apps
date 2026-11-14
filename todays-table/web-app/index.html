@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#1E5631" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="manifest" href="./manifest.json" />
+  <title>Meals to Rate • Anissa & Adamme</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            forest: '#1E5631',
+            sage: '#E8F5E9',
+            cream: '#FAF7F2',
+            hfBg: '#E6F4EA',
+            hfText: '#137333',
+            ypBg: '#FFF4D6',
+            ypText: '#B06000'
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body {
+      background-color: #FAF7F2;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .sheet-backdrop {
+      backdrop-filter: blur(4px);
+    }
+  </style>
+</head>
+<body class="min-h-screen text-[#1C2520] pb-12 select-none">
+
+  <!-- Top App Bar -->
+  <header class="sticky top-0 z-20 bg-[#FAF7F2]/95 backdrop-blur-md border-b border-stone-200/70 px-4 py-3.5 flex items-center justify-between">
+    <div>
+      <h1 class="text-xl font-extrabold tracking-tight text-[#1C2520]">Meals to Rate</h1>
+      <p class="text-xs font-medium text-stone-500">Anissa &amp; Adamme • HelloFresh + YellowPicnic</p>
+    </div>
+    <div class="flex items-center gap-1">
+      <button id="refreshBtn" onclick="fetchMeals()" class="p-2.5 rounded-full hover:bg-stone-200/60 active:scale-95 transition" title="Refresh">
+        <svg class="w-5 h-5 text-stone-700" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        </svg>
+      </button>
+      <button onclick="openSettings()" class="p-2.5 rounded-full hover:bg-stone-200/60 active:scale-95 transition" title="Settings">
+        <svg class="w-5 h-5 text-stone-700" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="max-w-lg mx-auto px-4 pt-3">
+    <!-- Summary Banner -->
+    <div id="summaryBanner" class="hidden mb-4 bg-sage rounded-2xl px-4 py-3 flex items-center gap-3">
+      <div id="summaryCountBadge" class="w-9 h-9 rounded-full bg-forest text-white font-bold text-sm flex items-center justify-center shrink-0">0</div>
+      <div>
+        <p id="summaryTitle" class="text-sm font-bold text-forest">Unrated meals waiting</p>
+        <p id="summarySubtitle" class="text-xs text-forest/80">Tap any dish to score for Anissa &amp; Adamme</p>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loadingState" class="py-24 flex flex-col items-center justify-center text-center">
+      <div class="w-10 h-10 border-4 border-forest border-t-transparent rounded-full animate-spin mb-4"></div>
+      <p class="text-stone-600 font-medium text-sm">Loading unrated meals &amp; dish photos…</p>
+    </div>
+
+    <!-- Error State -->
+    <div id="errorState" class="hidden py-16 px-4 flex flex-col items-center text-center">
+      <h2 class="text-lg font-extrabold text-stone-800 mb-2">Couldn't Connect to Sheet</h2>
+      <p id="errorMessage" class="text-sm text-stone-600 bg-stone-200/70 rounded-2xl p-4 mb-5 max-w-md"></p>
+      <div class="flex gap-3">
+        <button onclick="openSettings()" class="px-4 py-2.5 rounded-xl border border-stone-300 text-sm font-semibold text-stone-700">Endpoint URL</button>
+        <button onclick="fetchMeals()" class="px-5 py-2.5 rounded-xl bg-forest text-white text-sm font-bold">Retry</button>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="hidden py-20 flex flex-col items-center text-center">
+      <div class="w-16 h-16 rounded-full bg-sage text-forest flex items-center justify-center mb-4">
+        <svg class="w-9 h-9" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+        </svg>
+      </div>
+      <h2 class="text-xl font-extrabold mb-1">All Meals Rated!</h2>
+      <p class="text-sm text-stone-500 max-w-xs mb-6">Both HelloFresh and YellowPicnic tabs are completely caught up.</p>
+      <button onclick="fetchMeals()" class="px-5 py-2.5 rounded-xl bg-forest text-white text-sm font-bold">Check Again</button>
+    </div>
+
+    <!-- Unified Meal Cards List -->
+    <div id="mealsList" class="space-y-4"></div>
+  </main>
+
+  <!-- Rating Bottom Sheet Modal -->
+  <div id="ratingModal" class="fixed inset-0 z-40 hidden">
+    <div onclick="closeRatingModal()" class="absolute inset-0 bg-black/50 sheet-backdrop transition-opacity"></div>
+    <div class="absolute bottom-0 inset-x-0 max-w-lg mx-auto bg-white rounded-t-[28px] max-h-[92vh] overflow-y-auto shadow-2xl pb-6">
+      <div class="w-10 h-1.5 bg-stone-300 rounded-full mx-auto my-3"></div>
+
+      <div class="px-5">
+        <!-- Hero Image inside Rating Prompt -->
+        <div class="relative h-48 rounded-2xl overflow-hidden bg-stone-100 mb-4">
+          <img id="modalImage" src="" alt="" class="w-full h-full object-cover" />
+          <div class="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/75"></div>
+
+          <div class="absolute top-3 inset-x-3 flex items-center justify-between">
+            <span id="modalServiceBadge" class="px-3 py-1 rounded-full text-xs font-bold shadow"></span>
+            <a id="modalRecipeLink" href="#" target="_blank" rel="noopener" class="hidden px-3 py-1 rounded-full bg-black/60 text-white text-xs font-semibold flex items-center gap-1">
+              View Recipe ↗
+            </a>
+          </div>
+
+          <div class="absolute bottom-3 inset-x-4 text-white">
+            <h3 id="modalMainTitle" class="text-lg font-extrabold leading-snug"></h3>
+            <p id="modalSubtitle" class="text-xs text-white/90 line-clamp-2 mt-0.5"></p>
+          </div>
+        </div>
+
+        <!-- Column A: Date Selector -->
+        <div class="mb-4">
+          <label class="block text-xs font-bold uppercase tracking-wider text-stone-500 mb-2">Date Cooked (Column A)</label>
+          <div class="flex items-center gap-2">
+            <button type="button" id="btnToday" onclick="selectDatePreset('today')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold border transition"></button>
+            <button type="button" id="btnYesterday" onclick="selectDatePreset('yesterday')" class="px-3.5 py-1.5 rounded-xl text-xs font-bold border transition"></button>
+            <input type="date" id="customDateInput" onchange="onCustomDateChange(this.value)" class="px-3 py-1.5 rounded-xl text-xs font-bold border border-stone-300 text-stone-700 bg-stone-50" />
+          </div>
+        </div>
+
+        <!-- Column C: Anissa's Rating (1-10) -->
+        <div class="mb-4">
+          <div class="flex items-center justify-between mb-2">
+            <div>
+              <span class="text-sm font-extrabold">Anissa's Rating</span>
+              <span class="text-xs text-stone-500 ml-1">(Column C)</span>
+            </div>
+            <span id="anissaSelectedLabel" class="text-xs font-bold text-stone-500">Tap 1–10</span>
+          </div>
+          <div id="anissaButtons" class="grid grid-cols-5 gap-2"></div>
+        </div>
+
+        <!-- Column D: Adamme's Rating (1-10) -->
+        <div class="mb-4">
+          <div class="flex items-center justify-between mb-2">
+            <div>
+              <span class="text-sm font-extrabold">Adamme's Rating</span>
+              <span class="text-xs text-stone-500 ml-1">(Column D)</span>
+            </div>
+            <span id="adammeSelectedLabel" class="text-xs font-bold text-stone-500">Tap 1–10</span>
+          </div>
+          <div id="adammeButtons" class="grid grid-cols-5 gap-2"></div>
+        </div>
+
+        <!-- Combined Average Banner -->
+        <div id="combinedScoreBanner" class="hidden mb-4 bg-sage text-forest rounded-xl py-2.5 px-4 text-center text-sm font-extrabold"></div>
+
+        <!-- Action Buttons -->
+        <div class="flex gap-3 pt-1">
+          <button type="button" onclick="closeRatingModal()" class="flex-1 h-12 rounded-xl border border-stone-300 font-semibold text-sm text-stone-700">
+            Cancel
+          </button>
+          <button type="button" id="saveRatingBtn" onclick="submitCurrentRating()" disabled class="flex-[2] h-12 rounded-xl bg-forest text-white font-bold text-sm disabled:opacity-40 transition flex items-center justify-center gap-2">
+            Save Rating
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+    <div onclick="closeSettings()" class="absolute inset-0 bg-black/50"></div>
+    <div class="relative bg-white rounded-2xl max-w-md w-full p-5 shadow-xl">
+      <h3 class="text-base font-extrabold mb-1">Apps Script Web App URL</h3>
+      <p class="text-xs text-stone-500 mb-3">Paste your deployed Google Apps Script Web App URL (/exec):</p>
+      <textarea id="webAppUrlInput" rows="3" class="w-full rounded-xl border border-stone-300 p-3 text-xs font-mono mb-4 focus:outline-none focus:border-forest"></textarea>
+      <div class="flex justify-end gap-2">
+        <button onclick="closeSettings()" class="px-4 py-2 rounded-xl text-xs font-semibold text-stone-600">Cancel</button>
+        <button onclick="saveSettings()" class="px-4 py-2 rounded-xl bg-forest text-white text-xs font-bold">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-5 inset-x-4 max-w-sm mx-auto z-50 hidden bg-stone-900 text-white text-xs font-semibold px-4 py-3 rounded-xl shadow-lg text-center"></div>
+
+  <script>
+    const DEFAULT_WEB_APP_URL = "https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec";
+    const STORAGE_KEY = "meal_rater_webapp_url";
+
+    let meals = [];
+    let activeMeal = null;
+    let selectedAnissa = null;
+    let selectedAdamme = null;
+    let selectedDateStr = "";
+
+    function getWebAppUrl() {
+      return localStorage.getItem(STORAGE_KEY) || DEFAULT_WEB_APP_URL;
+    }
+
+    function splitTitle(rawMeal) {
+      let cleaned = (rawMeal || "").trim();
+      const idx = cleaned.toLowerCase().indexOf(" with ");
+      if (idx > 0) {
+        const withPart = cleaned.substring(idx + 1).trim();
+        const half = Math.floor(withPart.length / 2);
+        if (half > 6) {
+          const firstHalf = withPart.substring(0, half);
+          const secondHalf = withPart.substring(half);
+          if (firstHalf.toLowerCase() === secondHalf.toLowerCase()) {
+            cleaned = cleaned.substring(0, idx + 1) + firstHalf;
+          }
+        }
+        return {
+          mainTitle: cleaned.substring(0, idx).trim(),
+          subtitle: cleaned.substring(idx + 1).trim()
+        };
+      }
+      return { mainTitle: cleaned, subtitle: "" };
+    }
+
+    function fallbackDishImage(mealObj) {
+      const isYP = (mealObj.tab || "").toLowerCase().includes("yellow");
+      if (
+        !isYP &&
+        mealObj.imageUrl &&
+        !mealObj.imageUrl.toLowerCase().includes("hellofresh-logo")
+      ) {
+        return mealObj.imageUrl;
+      }
+      const { mainTitle } = splitTitle(mealObj.meal);
+      const query = isYP
+        ? `${mainTitle} cooked dish food photography`
+        : `HelloFresh ${mainTitle}`;
+      return `https://tse2.mm.bing.net/th?q=${encodeURIComponent(query)}&w=800&h=500&c=7&rs=1&p=0`;
+    }
+
+    function formatSheetDate(dateObj) {
+      const mm = String(dateObj.getMonth() + 1).padStart(2, "0");
+      const dd = String(dateObj.getDate()).padStart(2, "0");
+      const yyyy = dateObj.getFullYear();
+      return `${mm}/${dd}/${yyyy}`;
+    }
+
+    function toIsoInputDate(dateObj) {
+      const mm = String(dateObj.getMonth() + 1).padStart(2, "0");
+      const dd = String(dateObj.getDate()).padStart(2, "0");
+      const yyyy = dateObj.getFullYear();
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    async function fetchMeals() {
+      document.getElementById("loadingState").classList.remove("hidden");
+      document.getElementById("errorState").classList.add("hidden");
+      document.getElementById("emptyState").classList.add("hidden");
+      document.getElementById("mealsList").innerHTML = "";
+      document.getElementById("summaryBanner").classList.add("hidden");
+
+      try {
+        const response = await fetch(getWebAppUrl(), { method: "GET", redirect: "follow" });
+        const text = await response.text();
+        if (text.trim().toLowerCase().startsWith("<!doctype html>")) {
+          throw new Error("Apps Script redirected to a sign-in page. Make sure your deployment has 'Who has access: Anyone'.");
+        }
+        const data = JSON.parse(text);
+        if (data.error) throw new Error(data.error);
+
+        meals = (data.meals || []).map(m => ({
+          ...m,
+          tab: m.tab || "HelloFresh",
+          resolvedImage: fallbackDishImage(m)
+        }));
+
+        renderMeals();
+      } catch (err) {
+        document.getElementById("loadingState").classList.add("hidden");
+        document.getElementById("errorState").classList.remove("hidden");
+        document.getElementById("errorMessage").textContent = err.message || "Unable to fetch unrated meals.";
+      }
+    }
+
+    function renderMeals() {
+      document.getElementById("loadingState").classList.add("hidden");
+      const listEl = document.getElementById("mealsList");
+      listEl.innerHTML = "";
+
+      if (!meals.length) {
+        document.getElementById("summaryBanner").classList.add("hidden");
+        document.getElementById("emptyState").classList.remove("hidden");
+        return;
+      }
+
+      document.getElementById("emptyState").classList.add("hidden");
+      const banner = document.getElementById("summaryBanner");
+      banner.classList.remove("hidden");
+      document.getElementById("summaryCountBadge").textContent = meals.length;
+      document.getElementById("summaryTitle").textContent =
+        meals.length === 1 ? "1 unrated meal waiting" : `${meals.length} unrated meals waiting`;
+
+      meals.forEach((meal, idx) => {
+        const isYP = (meal.tab || "").toLowerCase().includes("yellow");
+        const { mainTitle, subtitle } = splitTitle(meal.meal);
+        const badgeClass = isYP ? "bg-ypBg text-ypText" : "bg-hfBg text-hfText";
+        const badgeLabel = isYP ? "🧺 YellowPicnic" : "🌿 HelloFresh";
+
+        const card = document.createElement("div");
+        card.className = "bg-white rounded-[22px] shadow-sm border border-stone-200/80 overflow-hidden active:scale-[0.99] transition cursor-pointer";
+        card.onclick = () => openRatingModal(idx);
+
+        card.innerHTML = `
+          <div class="relative h-44 bg-stone-100">
+            <img src="${meal.resolvedImage}" alt="" class="w-full h-full object-cover" loading="lazy" />
+            <div class="absolute inset-0 bg-gradient-to-b from-black/25 via-transparent to-black/45"></div>
+            <div class="absolute top-3 inset-x-3 flex items-center justify-between">
+              <span class="px-3 py-1 rounded-full text-xs font-bold shadow-sm ${badgeClass}">${badgeLabel}</span>
+              ${meal.recipeUrl ? `
+                <a href="${meal.recipeUrl}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="px-3 py-1 rounded-full bg-black/60 text-white text-xs font-semibold">
+                  Recipe ↗
+                </a>
+              ` : ""}
+            </div>
+          </div>
+          <div class="p-4">
+            <h2 class="text-base font-extrabold leading-snug text-stone-900">${mainTitle}</h2>
+            ${subtitle ? `<p class="text-xs text-stone-500 mt-1 line-clamp-2">${subtitle}</p>` : ""}
+            <div class="border-t border-stone-100 mt-3.5 pt-3 flex items-center justify-between">
+              <div class="flex gap-2">
+                <span class="px-2.5 py-1 rounded-full bg-stone-100 text-stone-600 text-xs font-medium">Anissa: —</span>
+                <span class="px-2.5 py-1 rounded-full bg-stone-100 text-stone-600 text-xs font-medium">Adamme: —</span>
+              </div>
+              <span class="text-xs font-extrabold text-forest">Rate Meal →</span>
+            </div>
+          </div>
+        `;
+        listEl.appendChild(card);
+      });
+    }
+
+    function openRatingModal(index) {
+      activeMeal = meals[index];
+      if (!activeMeal) return;
+
+      selectedAnissa = null;
+      selectedAdamme = null;
+
+      const isYP = (activeMeal.tab || "").toLowerCase().includes("yellow");
+      const { mainTitle, subtitle } = splitTitle(activeMeal.meal);
+
+      document.getElementById("modalImage").src = activeMeal.resolvedImage;
+      const badge = document.getElementById("modalServiceBadge");
+      badge.className = `px-3 py-1 rounded-full text-xs font-bold shadow ${isYP ? "bg-ypBg text-ypText" : "bg-hfBg text-hfText"}`;
+      badge.textContent = isYP ? "🧺 YellowPicnic" : "🌿 HelloFresh";
+
+      const recipeLink = document.getElementById("modalRecipeLink");
+      if (activeMeal.recipeUrl) {
+        recipeLink.href = activeMeal.recipeUrl;
+        recipeLink.classList.remove("hidden");
+      } else {
+        recipeLink.classList.add("hidden");
+      }
+
+      document.getElementById("modalMainTitle").textContent = mainTitle;
+      document.getElementById("modalSubtitle").textContent = subtitle;
+
+      selectDatePreset("today");
+      renderRatingButtons();
+      updateModalSaveState();
+
+      document.getElementById("ratingModal").classList.remove("hidden");
+    }
+
+    function closeRatingModal() {
+      document.getElementById("ratingModal").classList.add("hidden");
+      activeMeal = null;
+    }
+
+    function selectDatePreset(preset) {
+      const d = new Date();
+      if (preset === "yesterday") d.setDate(d.getDate() - 1);
+      selectedDateStr = formatSheetDate(d);
+      document.getElementById("customDateInput").value = toIsoInputDate(d);
+
+      const todayBtn = document.getElementById("btnToday");
+      const yesterdayBtn = document.getElementById("btnYesterday");
+
+      const activeClass = "px-3.5 py-1.5 rounded-xl text-xs font-bold border border-forest bg-sage text-forest";
+      const inactiveClass = "px-3.5 py-1.5 rounded-xl text-xs font-bold border border-stone-300 text-stone-600";
+
+      todayBtn.className = preset === "today" ? activeClass : inactiveClass;
+      todayBtn.textContent = preset === "today" ? `Today (${selectedDateStr})` : "Today";
+
+      yesterdayBtn.className = preset === "yesterday" ? activeClass : inactiveClass;
+      yesterdayBtn.textContent = preset === "yesterday" ? `Yesterday (${selectedDateStr})` : "Yesterday";
+    }
+
+    function onCustomDateChange(isoVal) {
+      if (!isoVal) return;
+      const [yyyy, mm, dd] = isoVal.split("-");
+      selectedDateStr = `${mm}/${dd}/${yyyy}`;
+      document.getElementById("btnToday").className = "px-3.5 py-1.5 rounded-xl text-xs font-bold border border-stone-300 text-stone-600";
+      document.getElementById("btnToday").textContent = "Today";
+      document.getElementById("btnYesterday").className = "px-3.5 py-1.5 rounded-xl text-xs font-bold border border-stone-300 text-stone-600";
+      document.getElementById("btnYesterday").textContent = "Yesterday";
+    }
+
+    function renderRatingButtons() {
+      const anissaContainer = document.getElementById("anissaButtons");
+      const adammeContainer = document.getElementById("adammeButtons");
+      anissaContainer.innerHTML = "";
+      adammeContainer.innerHTML = "";
+
+      for (let i = 1; i <= 10; i++) {
+        const btnA = document.createElement("button");
+        btnA.type = "button";
+        btnA.textContent = i;
+        btnA.className = selectedAnissa === i
+          ? "h-11 rounded-xl font-bold text-sm bg-forest text-white shadow-sm"
+          : "h-11 rounded-xl font-bold text-sm bg-stone-100 text-stone-800 hover:bg-stone-200";
+        btnA.onclick = () => {
+          selectedAnissa = i;
+          renderRatingButtons();
+          updateModalSaveState();
+        };
+        anissaContainer.appendChild(btnA);
+
+        const btnD = document.createElement("button");
+        btnD.type = "button";
+        btnD.textContent = i;
+        btnD.className = selectedAdamme === i
+          ? "h-11 rounded-xl font-bold text-sm bg-forest text-white shadow-sm"
+          : "h-11 rounded-xl font-bold text-sm bg-stone-100 text-stone-800 hover:bg-stone-200";
+        btnD.onclick = () => {
+          selectedAdamme = i;
+          renderRatingButtons();
+          updateModalSaveState();
+        };
+        adammeContainer.appendChild(btnD);
+      }
+
+      document.getElementById("anissaSelectedLabel").textContent =
+        selectedAnissa ? `${selectedAnissa} / 10` : "Tap 1–10";
+      document.getElementById("adammeSelectedLabel").textContent =
+        selectedAdamme ? `${selectedAdamme} / 10` : "Tap 1–10";
+    }
+
+    function updateModalSaveState() {
+      const saveBtn = document.getElementById("saveRatingBtn");
+      const banner = document.getElementById("combinedScoreBanner");
+      const ready = selectedAnissa !== null && selectedAdamme !== null;
+      saveBtn.disabled = !ready;
+
+      if (ready) {
+        const avg = (selectedAnissa + selectedAdamme) / 2;
+        banner.textContent = `★ Combined Meal Score: ${avg} / 10`;
+        banner.classList.remove("hidden");
+      } else {
+        banner.classList.add("hidden");
+      }
+    }
+
+    async function submitCurrentRating() {
+      if (!activeMeal || !selectedAnissa || !selectedAdamme) return;
+      const saveBtn = document.getElementById("saveRatingBtn");
+      saveBtn.disabled = true;
+      saveBtn.textContent = "Saving to Sheet…";
+
+      const mealToSave = activeMeal;
+      const payload = {
+        tab: mealToSave.tab || "HelloFresh",
+        rowNumber: mealToSave.rowNumber,
+        meal: mealToSave.meal,
+        date: selectedDateStr,
+        anissa: selectedAnissa,
+        adamme: selectedAdamme
+      };
+
+      try {
+        // Use text/plain to avoid CORS preflight OPTIONS failure on Google Apps Script
+        const response = await fetch(getWebAppUrl(), {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(payload),
+          redirect: "follow"
+        });
+        const result = await response.json();
+        if (!result.success) {
+          throw new Error(result.error || "Failed to save rating");
+        }
+
+        const avg = (selectedAnissa + selectedAdamme) / 2;
+        closeRatingModal();
+        showToast(`Saved ${splitTitle(mealToSave.meal).mainTitle} (★ ${avg} avg)`);
+        await fetchMeals();
+      } catch (err) {
+        saveBtn.disabled = false;
+        saveBtn.textContent = "Save Rating";
+        showToast(`Error: ${err.message}`);
+      }
+    }
+
+    function openSettings() {
+      document.getElementById("webAppUrlInput").value = getWebAppUrl();
+      document.getElementById("settingsModal").classList.remove("hidden");
+    }
+
+    function closeSettings() {
+      document.getElementById("settingsModal").classList.add("hidden");
+    }
+
+    function saveSettings() {
+      const val = document.getElementById("webAppUrlInput").value.trim();
+      if (val) localStorage.setItem(STORAGE_KEY, val);
+      closeSettings();
+      fetchMeals();
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById("toast");
+      t.textContent = msg;
+      t.classList.remove("hidden");
+      setTimeout(() => t.classList.add("hidden"), 3500);
+    }
+
+    fetchMeals();
+  </script>
+</body>
+</html>
