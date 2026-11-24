@@ -160,8 +160,8 @@ fun MealRaterScreen(
             submitError = submitError,
             onDismiss = { viewModel.selectMealForRating(null) },
             onOpenRecipe = openRecipeSafe,
-            onSubmitRating = { date, anissa, adamme ->
-                viewModel.submitMealRating(meal, date, anissa, adamme)
+            onSubmitRating = { date, anissa, adamme, notes ->
+                viewModel.submitMealRating(meal, date, anissa, adamme, notes)
             }
         )
     }

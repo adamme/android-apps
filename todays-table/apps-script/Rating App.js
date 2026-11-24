@@ -98,14 +98,14 @@ function doGet(e) {
   return jsonResponse({ meals: allUnratedMeals });
 }
 
-// POST: Writes Date (Col A), Anissa (Col C), Adamme (Col D), & moves row below unrated
+// POST: Writes Date (Col A), Anissa (Col C), Adamme (Col D), optional Notes, & moves row below unrated
 // Does NOT write to Column E (Average) — Average is calculated by the formula in the sheet.
 function doPost(e) {
   const lock = LockService.getScriptLock();
   lock.waitLock(10000);
   try {
     const body = JSON.parse(e.postData.contents);
-    const { tab, rowNumber, meal, date, anissa, adamme } = body;
+    const { tab, rowNumber, meal, date, anissa, adamme, notes } = body;
 
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     const sheet = getSheetForTab(ss, tab || "HelloFresh");
@@ -131,6 +131,12 @@ function doPost(e) {
     sheet.getRange(targetRow, 3).setValue(hasAnissaNum ? anissaNum : "-");
     sheet.getRange(targetRow, 4).setValue(hasAdammeNum ? adammeNum : "-");
 
+    const notesStr = (notes !== undefined && notes !== null) ? String(notes).trim() : "";
+    if (notesStr !== "") {
+      const notesCol = findNotesColumn(sheet);
+      sheet.getRange(targetRow, notesCol).setValue(notesStr);
+    }
+
     // 2. Move newly rated row right below the remaining unrated rows in this tab
     const lastUnratedRow = findLastUnratedRow(sheet, targetRow);
     if (lastUnratedRow > targetRow) {
@@ -146,6 +152,21 @@ function doPost(e) {
   } finally {
     lock.releaseLock();
   }
+}
+
+function findNotesColumn(sheet) {
+  const scanRows = Math.min(Math.max(sheet.getLastRow(), 1), 5);
+  const scanCols = Math.max(sheet.getLastColumn(), 6);
+  const values = sheet.getRange(1, 1, scanRows, scanCols).getDisplayValues();
+  for (let r = 0; r < values.length; r++) {
+    for (let c = 0; c < values[r].length; c++) {
+      const header = (values[r][c] || "").toString().trim().toLowerCase();
+      if (header === "notes" || header === "note") {
+        return c + 1;
+      }
+    }
+  }
+  return 6;
 }
 
 function resolveMealImage(tabName, mealName, recipeUrl) {

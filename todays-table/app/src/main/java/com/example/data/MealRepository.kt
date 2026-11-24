@@ -840,6 +840,10 @@ class MealRepository(private val context: Context) {
                 } else {
                     put("adamme", ratingRequest.adamme.trim().ifBlank { "-" })
                 }
+                val trimmedNotes = ratingRequest.notes.trim()
+                if (trimmedNotes.isNotEmpty()) {
+                    put("notes", trimmedNotes)
+                }
             }
 
             val mediaType = "application/json; charset=utf-8".toMediaType()

@@ -16,6 +16,8 @@
     <string name="chip_pick_date">Calendar</string>
     <string name="label_anissa_score">Anissa\u2019s Rating</string>
     <string name="label_adamme_score">Adamme\u2019s Rating</string>
+    <string name="label_notes_optional">Notes (Optional)</string>
+    <string name="placeholder_notes">Add any thoughts or tweaks for next time…</string>
     <string name="action_submit_rating">Save Rating to Sheet</string>
     <string name="action_submitting_rating">Saving to Google Sheet…</string>
     <string name="action_cancel">Cancel</string>

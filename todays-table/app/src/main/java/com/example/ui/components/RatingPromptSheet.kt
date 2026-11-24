@@ -33,6 +33,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -67,7 +68,7 @@ fun RatingPromptSheet(
     submitError: String?,
     onDismiss: () -> Unit,
     onOpenRecipe: (String) -> Unit,
-    onSubmitRating: (date: String, anissa: String, adamme: String) -> Unit
+    onSubmitRating: (date: String, anissa: String, adamme: String, notes: String) -> Unit
 ) {
     BackHandler(enabled = !isSubmitting) {
         onDismiss()
@@ -79,6 +80,7 @@ fun RatingPromptSheet(
     var dateInput by rememberSaveable(meal.uniqueId) { mutableStateOf(todayFormatted) }
     var anissaChoice by rememberSaveable(meal.uniqueId) { mutableStateOf("") }
     var adammeChoice by rememberSaveable(meal.uniqueId) { mutableStateOf("") }
+    var notesInput by rememberSaveable(meal.uniqueId) { mutableStateOf("") }
     var showDatePicker by rememberSaveable { mutableStateOf(false) }
 
     if (showDatePicker) {
@@ -317,6 +319,20 @@ fun RatingPromptSheet(
                     tagPrefix = "adamme_score"
                 )
 
+                OutlinedTextField(
+                    value = notesInput,
+                    onValueChange = { notesInput = it },
+                    label = { Text(stringResource(R.string.label_notes_optional)) },
+                    placeholder = { Text(stringResource(R.string.placeholder_notes)) },
+                    enabled = !isSubmitting,
+                    minLines = 2,
+                    maxLines = 4,
+                    shape = RoundedCornerShape(14.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("notes_input")
+                )
+
                 if (!submitError.isNullOrBlank()) {
                     Surface(
                         shape = RoundedCornerShape(12.dp),
@@ -334,7 +350,7 @@ fun RatingPromptSheet(
 
                 Button(
                     onClick = {
-                        onSubmitRating(dateInput, anissaChoice, adammeChoice)
+                        onSubmitRating(dateInput, anissaChoice, adammeChoice, notesInput.trim())
                     },
                     enabled = canSubmit,
                     shape = RoundedCornerShape(16.dp),

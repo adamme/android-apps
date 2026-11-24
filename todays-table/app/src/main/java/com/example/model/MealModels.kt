@@ -61,7 +61,8 @@ data class RateMealRequest(
     val meal: String,
     val date: String,
     val anissa: String,
-    val adamme: String
+    val adamme: String,
+    val notes: String = ""
 )
 
 sealed interface MealImageState {

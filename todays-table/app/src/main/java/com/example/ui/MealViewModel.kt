@@ -323,7 +323,8 @@ class MealViewModel(
         meal: UnratedMeal,
         dateString: String,
         anissaChoice: String,
-        adammeChoice: String
+        adammeChoice: String,
+        notes: String = ""
     ) {
         if (_isSubmitting.value) return
         val trimmedDate = dateString.trim()
@@ -346,7 +347,8 @@ class MealViewModel(
                     meal = meal.meal,
                     date = trimmedDate,
                     anissa = anissaChoice,
-                    adamme = adammeChoice
+                    adamme = adammeChoice,
+                    notes = notes.trim()
                 )
                 repository.submitRating(_webAppUrl.value, request)
 
